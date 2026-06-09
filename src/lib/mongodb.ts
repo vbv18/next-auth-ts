@@ -18,6 +18,10 @@ export async function connectDB() {
     try {
         cached.conn = await cached.promise;
 
+        if (ENV.NODE_ENV != "production") {
+            console.log("DB connected.");
+        }
+
     } catch (error) {
         cached.promise = null;
         throw error;
