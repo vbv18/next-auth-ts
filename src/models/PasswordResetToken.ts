@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 
 interface IPasswordResetToken {
     email: string,
-    token: string,
+    tokenHash: string,
     expires: Date
 }
 
@@ -16,7 +16,7 @@ const PasswordResetTokenSchema = new Schema<IPasswordResetToken>(
             index: true
         },
 
-        token: {
+        tokenHash: {
             type: String,
             required: true,
             unique: true,

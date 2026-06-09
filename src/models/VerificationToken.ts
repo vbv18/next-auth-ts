@@ -3,7 +3,7 @@ import mongoose, { Model, Schema } from "mongoose";
 
 export interface IVerificationToken {
     email: string,
-    token: string,
+    tokenHash: string,
     expires: Date
 }
 
@@ -16,7 +16,7 @@ const VerificationTokenSchema = new Schema<IVerificationToken>(
             index: true
         },
 
-        token: {
+        tokenHash: {
             type: String,
             required: true,
             unique: true,
