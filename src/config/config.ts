@@ -19,7 +19,7 @@ const ENVSchema = z.object({
     SMTP_SECURE: z.coerce.boolean().default(false),
     SMTP_USER: z.string().min(1),
     SMTP_PASSWORD: z.string().min(1),
-    SMTP_FROM: z.email(),
+    SMTP_FROM: z.string(),
 
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
