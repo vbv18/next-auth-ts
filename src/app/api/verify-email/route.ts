@@ -24,25 +24,10 @@ export async function GET(req: NextRequest) {
     // call auth.service
     const result = await verifyEmailToken(token);
 
-    if (result.success) {
-        return NextResponse.json(
-            {
-                success: true,
-                message: "User verification successful."
-            },
-            {
-                status: 200
-            }
-        )
-    }
-
     return NextResponse.json(
+        result,
         {
-            success: false,
-            message: "User verification failed!"
-        },
-        {
-            status: 400
+            status: result.success ? 200 : 400
         }
-    )
+    );
 }
