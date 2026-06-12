@@ -11,3 +11,11 @@ export const ResendVerificationSchema = z.object({
     email: z.email().trim().transform(val => val.toLowerCase()),
 });
 
+export const LoginSchema = z.object({
+    email: z.email().trim().transform(val => val.toLowerCase()),
+    password: z.string()
+});
+
+export const ForgotPasswordSchema = z.object({
+    email: z.email().trim().transform(val => val.toLowerCase()),
+})
