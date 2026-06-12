@@ -5,9 +5,16 @@ import VerificationToken from "@/models/VerificationToken";
 
 import { connectDB } from "../mongodb";
 import { ENV } from "@/config/config";
+import { generateToken, VERIFICATION_TOKEN_TTL_MS } from "../token";
+import { sendVerificationEmail } from "../mail";
 
 
-export async function verifyEmailToken(token: string) {
+interface ServiceResponse {
+    success: boolean,
+    message: string
+}
+
+export async function verifyEmailToken(token: string): Promise<ServiceResponse> {
 
     try {
         await connectDB();
@@ -83,4 +90,57 @@ export async function verifyEmailToken(token: string) {
             message: "Internal server error"
         };
     }
+}
+
+export async function resendVerification(email: string): Promise<ServiceResponse> {
+
+    await connectDB();
+
+    const user =
+        await User.findOne({
+            email,
+        });
+
+    if (!user) {
+        return {
+            success: true,
+            message: "User not found"
+        };
+    }
+
+    if (user.emailVerified) {
+        return {
+            success: true,
+            message:
+                "Email already verified.",
+        };
+    }
+
+    await VerificationToken.deleteMany({
+        email,
+    });
+
+    const { token, tokenHash } = generateToken();
+
+    await VerificationToken.create({
+        email,
+
+        tokenHash,
+
+        expires: new Date(
+            Date.now() +
+            VERIFICATION_TOKEN_TTL_MS
+        ),
+    });
+
+    await sendVerificationEmail(
+        email,
+        token
+    );
+
+    return {
+        success: true,
+        message:
+            "Verification email sent.",
+    };
 }
