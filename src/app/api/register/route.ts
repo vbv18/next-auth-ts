@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import { RegisterSchema } from "@/lib/validations/auth";
+
 import User from "@/models/user.model";
-import { hashPassword } from "@/lib/bcrypt";
-import { generateToken, VERIFICATION_TOKEN_TTL_MS } from "@/lib/token";
 import VerificationToken from "@/models/VerificationToken";
+
+import { hashPassword } from "@/lib/bcrypt";
 import { sendVerificationEmail } from "@/lib/mail";
+import { connectDB } from "@/lib/mongodb";
+import { generateToken, VERIFICATION_TOKEN_TTL_MS } from "@/lib/token";
+import { RegisterSchema } from "@/lib/validations/auth";
+
 
 export async function POST(req: NextRequest) {
 
@@ -14,6 +17,7 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
 
         const parsed = RegisterSchema.safeParse(body);
+
         if (!parsed.success) {
             return NextResponse.json(
                 {
@@ -40,6 +44,23 @@ export async function POST(req: NextRequest) {
                 {
                     success: false,
                     message: "User already exists",
+                },
+                {
+                    status: 409
+                }
+            );
+        }
+
+        // check username availability
+        const isUsernameUsed = await User.findOne({
+            username: parsed.data.username
+        });
+
+        if (isUsernameUsed) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Username not available.",
                 },
                 {
                     status: 409
