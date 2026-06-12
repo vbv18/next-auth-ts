@@ -1,4 +1,4 @@
-import { toLowerCase, z } from "zod";
+import { z } from "zod";
 
 
 export const RegisterSchema = z.object({
@@ -7,4 +7,7 @@ export const RegisterSchema = z.object({
     password: z.string().min(4)
 });
 
-export type RegisterInputType = z.infer<typeof RegisterSchema>;
+export const ResendVerificationSchema = z.object({
+    email: z.email().trim().transform(val => val.toLowerCase()),
+});
+
