@@ -7,6 +7,7 @@ import { connectDB } from "../mongodb";
 import { ENV } from "@/config/config";
 import { generateToken, VERIFICATION_TOKEN_TTL_MS } from "../token";
 import { sendVerificationEmail } from "../mail";
+import { verifyPassword } from "../bcrypt";
 
 
 interface ServiceResponse {
@@ -142,5 +143,47 @@ export async function resendVerification(email: string): Promise<ServiceResponse
         success: true,
         message:
             "Verification email sent.",
+    };
+}
+
+export async function loginUser(email: string, password: string): Promise<{
+    id: string,
+    email: string,
+    username: string,
+    role: "user" | "admin"
+} | null> {
+
+    await connectDB();
+
+    // find user and select passwordHash
+    const user = await User.findOne({
+        email
+    }).select("+passwordHash");
+
+    if (!user) {
+        return null;
+    }
+
+    if (!user.passwordHash) {
+        return null;
+    }
+
+    // check is email is not verified
+    if (!user.emailVerified) {
+        return null;
+    }
+
+    // check password
+    const isValid = await verifyPassword(password, user.passwordHash);
+
+    if (!isValid) {
+        return null;
+    }
+
+    return {
+        id: user._id.toString(),
+        email: user.email,
+        username: user.username,
+        role: user.role
     };
 }
